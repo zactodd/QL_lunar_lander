@@ -20,8 +20,7 @@ class DeepQNetwork(object):
         self.sess.run(tf.global_variables_initializer())
         self.saver = tf.train.Saver()
         self.checkpoint_file = os.path.join(chkpt_dir, 'deepqnet.ckpt')
-        self.params = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
-                                        scope=self.name)
+        self.params = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=self.name)
 
     def build_network(self):
         with tf.variable_scope(self.name):
@@ -30,12 +29,10 @@ class DeepQNetwork(object):
             self.q_target = tf.placeholder(tf.float32, shape=[None, self.n_actions], name='q_value')
 
             flat = tf.layers.flatten(self.input)
-            dense1 = tf.layers.dense(flat, units=self.fc1_dims,
-                                     activation=tf.nn.relu, )
-            dense2 = tf.layers.dense(dense1, units=self.fc2_dims,
-                                     activation=tf.nn.relu, )
-            self.Q_values = tf.layers.dense(dense2, units=self.n_actions, )
-            self.loss = tf.reduce_mean(tf.square(self.Q_values - self.q_target))
+            dense1 = tf.layers.dense(flat, units=self.fc1_dims, activation=tf.nn.relu, )
+            dense2 = tf.layers.dense(dense1, units=self.fc2_dims, activation=tf.nn.relu, )
+            self.q_values = tf.layers.dense(dense2, units=self.n_actions, )
+            self.loss = tf.reduce_mean(tf.square(self.q_values - self.q_target))
             self.train_op = tf.train.AdamOptimizer(self.lr).minimize(self.loss)
 
     def load_checkpoint(self):
@@ -83,18 +80,13 @@ class Agent(object):
         state = state[np.newaxis, :]
         rand = np.random.random()
         if rand < self.epsilon:
-            action = np.random.choice(self.action_space)
+            return np.random.choice(self.action_space)
         else:
-            actions = self.q_eval.sess.run(self.q_eval.Q_values, feed_dict={self.q_eval.input: state})
-            action = np.argmax(actions)
-
-        return action
+            return np.argmax(self.q_eval.sess.run(self.q_eval.q_values, feed_dict={self.q_eval.input: state}))
 
     def learn(self):
         if self.mem_cntr > self.batch_size:
-            max_mem = self.mem_cntr if self.mem_cntr < self.mem_size \
-                else self.mem_size
-
+            max_mem = self.mem_cntr if self.mem_cntr < self.mem_size else self.mem_size
             batch = np.random.choice(max_mem, self.batch_size)
 
             state_batch = self.state_memory[batch]
@@ -105,8 +97,8 @@ class Agent(object):
             new_state_batch = self.new_state_memory[batch]
             terminal_batch = self.terminal_memory[batch]
 
-            q_eval = self.q_eval.sess.run(self.q_eval.Q_values, feed_dict={self.q_eval.input: state_batch})
-            q_next = self.q_eval.sess.run(self.q_eval.Q_values, feed_dict={self.q_eval.input: new_state_batch})
+            q_eval = self.q_eval.sess.run(self.q_eval.q_values, feed_dict={self.q_eval.input: state_batch})
+            q_next = self.q_eval.sess.run(self.q_eval.q_values, feed_dict={self.q_eval.input: new_state_batch})
             q_target = q_eval.copy()
             batch_index = np.arange(self.batch_size, dtype=np.int32)
 

@@ -25,7 +25,6 @@ class DeepQNetwork(object):
     def build_network(self):
         with tf.variable_scope(self.name):
             self.input = tf.placeholder(tf.float32, shape=[None, *self.input_dims], name='inputs')
-            self.actions = tf.placeholder(tf.float32, shape=[None, self.n_actions], name='action_taken')
             self.q_target = tf.placeholder(tf.float32, shape=[None, self.n_actions], name='q_value')
 
             flat = tf.layers.flatten(self.input)
@@ -104,12 +103,10 @@ class Agent(object):
 
             q_target[batch_index, action_indices] = reward_batch + self.gamma * np.max(q_next, axis=1) * terminal_batch
 
-            _ = self.q_eval.sess.run(self.q_eval.train_op,
-                                     feed_dict={
-                                        self.q_eval.input: state_batch,
-                                        self.q_eval.actions: action_batch,
-                                        self.q_eval.q_target: q_target
-                                     })
+            self.q_eval.sess.run(
+                self.q_eval.train_op,
+                feed_dict={self.q_eval.input: state_batch, self.q_eval.q_target: q_target}
+            )
 
             self.epsilon = self.epsilon * self.epsilon_dec if self.epsilon > self.epsilon_min else self.epsilon_min
 

@@ -3,7 +3,6 @@ from dpn import Agent
 from utils import plotLearning
 import numpy as np
 from gym import wrappers
-import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     env = gym.make('LunarLander-v2')
@@ -34,10 +33,10 @@ if __name__ == '__main__':
         done = False
         if i % 10 == 0 and i > 0:
             avg_score = np.mean(scores[max(0, i - 10):(i + 1)])
-            print('episode: ', i, 'score: ', score, ' average score %.3f' % avg_score, 'epsilon %.3f' % agent.epsilon)
+            print(f"episode: {i:0>4}, score: {score:.4f}, average score {avg_score:.4f}, epsilon: {agent.epsilon:.4f}")
             # agent.save_models()
         else:
-            print('episode: ', i, 'score: ', score)
+            print(f"episode: {i:0>4}, score: {score:.4f}")
 
         observation = env.reset()
         score = 0
@@ -45,8 +44,7 @@ if __name__ == '__main__':
             action = agent.choose_action(observation)
             observation_, reward, done, info = env.step(action)
             score += reward
-            agent.store_transition(observation, action,
-                                   reward, observation_, int(done))
+            agent.store_transition(observation, action, reward, observation_, int(done))
             observation = observation_
             agent.learn()
 

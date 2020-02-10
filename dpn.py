@@ -4,6 +4,7 @@ import numpy as np
 
 tf.disable_eager_execution()
 
+
 class DeepQNetwork(object):
     def __init__(self, lr, n_actions, name, input_dims,
                  fc1_dims=256, fc2_dims=256, chkpt_dir='tmp/dqn'):

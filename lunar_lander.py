@@ -4,6 +4,9 @@ from utils import plot_learning
 import numpy as np
 from gym import wrappers
 
+SIZE, PLACES = 10, 4
+DF = f">{SIZE}.{PLACES}f"
+
 
 if __name__ == '__main__':
     env = gym.make('LunarLander-v2')
@@ -27,15 +30,15 @@ if __name__ == '__main__':
     scores = []
     eps_history = []
 
-    score = 0
+    score = 0.0000
     env = wrappers.Monitor(env, "tmp/lunar-lander-4", video_callable=lambda episode_id: True, force=True)
 
     for i in range(n_games):
         done = False
-        score_str = f"episode: {i:0>4}, score: {score:>6.4f}"
+        score_str = f"episode: {i:0>4}, score: {score:{DF}}"
         if i % 10 == 0 and i > 0:
             avg_score = np.mean(scores[max(0, i - 10):(i + 1)])
-            print(score_str + f", average score {avg_score:6>.4f}, epsilon: {agent.epsilon:6>.4f}")
+            print(score_str + f", average score {avg_score:>{DF}}, epsilon: {agent.epsilon:.4f}")
             # agent.save_models()
         else:
             print(score_str)

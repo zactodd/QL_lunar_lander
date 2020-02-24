@@ -1,13 +1,14 @@
 import gym
 from dpn import Agent
-from utils import plotLearning
+from utils import plot_learning
 import numpy as np
 from gym import wrappers
+
 
 if __name__ == '__main__':
     env = gym.make('LunarLander-v2')
     lr = 0.0005
-    n_games = 500
+    n_games = 2000
 
     agent = Agent(
         gamma=0.99,
@@ -20,9 +21,9 @@ if __name__ == '__main__':
         batch_size=64
     )
 
-    alpha = 'alpha' + str(lr)
+    alpha = f"alpha{lr}"
 
-    filename = '0-lunar-lander-256x256-' + alpha + '-bs64-adam-faster_decay.png'
+    filename = f"0-lunar-lander-256x256-{alpha}-bs64-adam-faster_decay.png"
     scores = []
     eps_history = []
 
@@ -31,12 +32,13 @@ if __name__ == '__main__':
 
     for i in range(n_games):
         done = False
+        score_str = f"episode: {i:0>4}, score: {score:>6.4f}"
         if i % 10 == 0 and i > 0:
             avg_score = np.mean(scores[max(0, i - 10):(i + 1)])
-            print(f"episode: {i:0>4}, score: {score:.4f}, average score {avg_score:.4f}, epsilon: {agent.epsilon:.4f}")
+            print(score_str + f", average score {avg_score:6>.4f}, epsilon: {agent.epsilon:6>.4f}")
             # agent.save_models()
         else:
-            print(f"episode: {i:0>4}, score: {score:.4f}")
+            print(score_str)
 
         observation = env.reset()
         score = 0
@@ -52,4 +54,4 @@ if __name__ == '__main__':
         scores.append(score)
 
     x = [i + 1 for i in range(n_games)]
-    plotLearning(x, scores, eps_history, filename)
+    plot_learning(x, scores, eps_history, filename)

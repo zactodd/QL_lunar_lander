@@ -6,8 +6,7 @@ tf.disable_eager_execution()
 
 
 class DeepQNetwork(object):
-    def __init__(self, lr, n_actions, name, input_dims,
-                 fc1_dims=256, fc2_dims=256, chkpt_dir='tmp/dqn'):
+    def __init__(self, lr, n_actions, name, input_dims, fc1_dims=256, fc2_dims=256, chkpt_dir="tmp/dqn"):
         self.lr = lr
         self.n_actions = n_actions
         self.name = name
@@ -16,23 +15,21 @@ class DeepQNetwork(object):
         self.chkpt_dir = chkpt_dir
         self.input_dims = input_dims
         self.sess = tf.Session()
-        self.build_network()
-        self.sess.run(tf.global_variables_initializer())
-        self.saver = tf.train.Saver()
-        self.checkpoint_file = os.path.join(chkpt_dir, 'deepqnet.ckpt')
-        self.params = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=self.name)
 
-    def build_network(self):
         with tf.variable_scope(self.name):
-            self.input = tf.placeholder(tf.float32, shape=[None, *self.input_dims], name='inputs')
-            self.q_target = tf.placeholder(tf.float32, shape=[None, self.n_actions], name='q_value')
-
+            self.input = tf.placeholder(tf.float32, shape=[None, *self.input_dims], name="inputs")
+            self.q_target = tf.placeholder(tf.float32, shape=[None, self.n_actions], name="q_value")
             flat = tf.layers.flatten(self.input)
-            dense1 = tf.layers.dense(flat, units=self.fc1_dims, activation=tf.nn.relu, )
-            dense2 = tf.layers.dense(dense1, units=self.fc2_dims, activation=tf.nn.relu, )
+            dense1 = tf.layers.dense(flat, units=self.fc1_dims, activation=tf.nn.relu,)
+            dense2 = tf.layers.dense(dense1, units=self.fc2_dims, activation=tf.nn.relu )
             self.q_values = tf.layers.dense(dense2, units=self.n_actions, )
             self.loss = tf.reduce_mean(tf.square(self.q_values - self.q_target))
             self.train_op = tf.train.AdamOptimizer(self.lr).minimize(self.loss)
+
+        self.sess.run(tf.global_variables_initializer())
+        self.saver = tf.train.Saver()
+        self.checkpoint_file = os.path.join(chkpt_dir, "deepqnet.ckpt")
+        self.params = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=self.name)
 
     def load_checkpoint(self):
         print("...Loading checkpoint...")
@@ -46,7 +43,7 @@ class DeepQNetwork(object):
 class Agent(object):
     def __init__(self, alpha, gamma, mem_size, n_actions, epsilon, batch_size,
                  n_games, input_dims=(210, 160, 4), epsilon_dec=0.996,
-                 epsilon_end=0.01, q_eval_dir='tmp/q_eval'):
+                 epsilon_end=0.01, q_eval_dir="tmp/q_eval"):
         self.action_space = [i for i in range(n_actions)]
         self.n_actions = n_actions
         self.n_games = n_games
@@ -57,7 +54,7 @@ class Agent(object):
         self.epsilon_dec = epsilon_dec
         self.epsilon_min = epsilon_end
         self.batch_size = batch_size
-        self.q_eval = DeepQNetwork(alpha, n_actions, input_dims=input_dims, name='q_eval', chkpt_dir=q_eval_dir)
+        self.q_eval = DeepQNetwork(alpha, n_actions, input_dims=input_dims, name="q_eval", chkpt_dir=q_eval_dir)
         self.state_memory = np.zeros((self.mem_size, *input_dims))
         self.new_state_memory = np.zeros((self.mem_size, *input_dims))
         self.action_memory = np.zeros((self.mem_size, self.n_actions), dtype=np.int8)

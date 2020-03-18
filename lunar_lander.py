@@ -38,7 +38,7 @@ if __name__ == '__main__':
         score_str = f"episode: {i:0>4}, score: {score:{DF}}"
         if i % 10 == 0 and i > 0:
             avg_score = np.mean(scores[max(0, i - 10):(i + 1)])
-            print(score_str + f", average score {avg_score:{DF}}, epsilon: {agent.epsilon:.4f}")
+            print(score_str + f", average score: {avg_score:{DF}}, epsilon: {agent.epsilon:.4f}")
             # agent.save_models()
         else:
             print(score_str)
